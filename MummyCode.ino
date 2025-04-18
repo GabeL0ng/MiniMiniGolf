@@ -1,0 +1,91 @@
+#include <DFRobot_DF1201S.h>
+#include <SoftwareSerial.h>
+
+// Tell Arduino which pins are wired to MP3 player (remember RX on Arduino is TX on MP3 player)
+SoftwareSerial DF1201SSerial(2, 3);  //Arduino RX, Arduino TX
+
+// object that will handle all comms to MP3 player
+DFRobot_DF1201S DF1201S;
+
+const int EYESpin = 8;
+const int ENTOMBEDpin = 5;
+int isTombed;
+const int PYRAMIDpin = 10;
+int count = 1;
+
+
+void setup() {
+  // LED and IR
+  pinMode(EYESpin, OUTPUT);
+  pinMode(ENTOMBEDpin, INPUT_PULLUP);
+  pinMode(PYRAMIDpin, OUTPUT);
+  Serial.begin(9600);
+  //MP3 Stuff
+    pinMode(13, OUTPUT);
+  // Initialize MP3 player communications
+  DF1201SSerial.begin(115200);
+  while(!DF1201S.begin(DF1201SSerial)){
+    Serial.println("Init failed, please check the wire connection!");
+    delay(1000);
+  }
+  DF1201S.setVol(0);  // set a low-ish volume (valid values from 0 to 30)
+  delay(500);
+  DF1201S.switchFunction(DF1201S.MUSIC); // be a music player, not a USB drive
+  delay(500);
+  DF1201S.setVol(15);
+}
+
+void playVoice() {
+  DF1201S.setVol(25);
+  //play a certain file, and then skip 2
+  DF1201S.playFileNum(0);
+  DF1201S.next();
+  DF1201S.next();
+  //delay for voice to play
+  delay(8000);
+}
+
+void playChariotRace() {
+  //set volume to max for music without distortion
+  DF1201S.setVol(20);
+  //play 15 seconds in to chariot race file
+  DF1201S.playFileNum(0);
+  DF1201S.fastForward(15);
+  delay(10000);
+  //fade out
+  int volume = 15; // Define volume locally
+  for (int i = 0; i < 15; i++) {
+    volume = volume-1;
+    DF1201S.setVol(volume);
+    delay(300); // Wait for 1 second
+    }
+    DF1201S.pause();
+}
+
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  isTombed = !digitalRead(ENTOMBEDpin);
+  Serial.println(!digitalRead(ENTOMBEDpin));
+  Serial.println(count);
+  count = count + 1;
+  int volume = 15;
+  if (isTombed){
+    digitalWrite(PYRAMIDpin, HIGH);
+    digitalWrite(EYESpin, HIGH);
+    playVoice();
+    //turn off LED
+    digitalWrite(EYESpin, LOW);
+    //stop the music
+    DF1201S.pause();
+    playChariotRace();
+    digitalWrite(PYRAMIDpin, LOW);
+    }
+    //when nothing happens for IR sensor, make sure there is no music and make sure LED is off
+    else {
+      digitalWrite(EYESpin, LOW);
+      digitalWrite(PYRAMIDpin, LOW);
+      DF1201S.pause();
+    }
+  delay(900);
+}
