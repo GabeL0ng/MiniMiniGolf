@@ -13,4 +13,4 @@ Navigate through an ancient tomb and find the mummy! But, when you get to his to
 Travel through a pyramid, journey around idols, and get help from a magical sphinx. If you find and hit the mummy’s gem, your path back to the present will be revealed. But, you must get through the door in time or forever be trapped in the past!
 
 
-Link to video:
+Link to video: https://youtu.be/l4mI4XTYS5k
